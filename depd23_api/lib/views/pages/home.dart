@@ -16,7 +16,7 @@ class _HomePageState extends State<HomePage> {
   dynamic selectedShippingCompany;
   final ctrlNumber = TextEditingController();
 
-  List<Province> provinceData = [];
+  List<Province> provinceOriginData = [];
   dynamic provinceIdOrigin;
   dynamic selectedProvinceOrigin;
 
@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   dynamic cityIdOrigin;
   dynamic selectedCityOrigin;
 
+  List<Province> provinceToData =  [];
   dynamic provinceIdTo;
   dynamic selectedProvinceTo;
 
@@ -35,28 +36,37 @@ class _HomePageState extends State<HomePage> {
     // dynamic prov;
     await MasterDataService.getProvince().then((value) {
       setState(() {
-        provinceData = value;
+        provinceOriginData = value;
+        provinceToData = value;
         isLoading = false;
       });
     });
     // return prov;
   }
 
-  Future<List<City>> getCities(dynamic provId) async {
-    List<City> cities = [];
+  Future<List<City>> getCitiesOrigin(dynamic provId) async {
+    List<City> citiesOrigin = [];
     await MasterDataService.getCity(provId).then((value) {
-      cities = value;
+      citiesOrigin = value;
     });
-    return cities;
+    return citiesOrigin;
+  }
+
+  Future<List<City>> getCitiesDestination(dynamic provId) async {
+    List<City> citiesDestination = [];
+    await MasterDataService.getCity(provId).then((value) {
+      citiesDestination = value;
+    });
+    return citiesDestination;
   }
 
   Future<void> updateCityDataOrigin(dynamic provId) async {
-    cityDataOrigin = getCities(provId);
+    cityDataOrigin = getCitiesOrigin(provId);
     await cityDataOrigin;
   }
 
   Future<void> updateCityDataTo(dynamic provId) async {
-    cityDataTo = getCities(provId);
+    cityDataTo = getCitiesDestination(provId);
     await cityDataTo;
   }
 
@@ -68,7 +78,8 @@ class _HomePageState extends State<HomePage> {
       isLoading = true;
     });
     getProvinces();
-    cityDataOrigin = getCities(provinceIdOrigin);
+    cityDataOrigin = getCitiesOrigin(provinceIdOrigin);
+    cityDataTo = getCitiesDestination(provinceIdTo);
     // Future.delayed(Duration(seconds: 3), () {
     //    getCities(provinceIdOrigin);
     // });
@@ -164,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                           Flexible(
                             child: Container(
                               width: 100,
-                              child: provinceData.isEmpty
+                              child: provinceOriginData.isEmpty
                                   ? const Align(
                                       alignment: Alignment.center,
                                       child: Text("Data tidak ditemukan"),
@@ -180,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                                           ? Text('Pilih Provinsi')
                                           : Text(
                                               selectedProvinceOrigin.province!),
-                                      items: provinceData
+                                      items: provinceOriginData
                                           .map<DropdownMenuItem<Province>>(
                                               (Province value) {
                                         return DropdownMenuItem(
@@ -260,7 +271,7 @@ class _HomePageState extends State<HomePage> {
                           Flexible(
                             child: Container(
                               width: 100,
-                              child: provinceData.isEmpty
+                              child: provinceToData.isEmpty
                                   ? const Align(
                                       alignment: Alignment.center,
                                       child: Text("Data tidak ditemukan"),
@@ -276,7 +287,7 @@ class _HomePageState extends State<HomePage> {
                                           ? Text('Pilih Provinsi')
                                           : Text(
                                               selectedProvinceTo.province!),
-                                      items: provinceData
+                                      items: provinceToData
                                           .map<DropdownMenuItem<Province>>(
                                               (Province value) {
                                         return DropdownMenuItem(
@@ -329,7 +340,7 @@ class _HomePageState extends State<HomePage> {
                                           setState(() {
                                             selectedCityTo = newValue;
                                             cityIdTo =
-                                                cityIdTo.cityId;
+                                                selectedCityTo.cityId;
                                           });
                                         });
                                   } else if (snapshot.hasError) {
@@ -348,15 +359,15 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   width: double.infinity,
                   height: double.infinity,
-                  child: provinceData.isEmpty
+                  child: provinceOriginData.isEmpty
                       ? const Align(
                           alignment: Alignment.center,
                           child: Text("Data tidak ditemukan"),
                         )
                       : ListView.builder(
-                        itemCount: provinceData.length,
+                        itemCount: provinceOriginData.length,
                         itemBuilder: (context, index){
-                          return CardProvince(provinceData[index]);
+                          return CardProvince(provinceOriginData[index]);
                         })
                 ),
               ),
