@@ -41,6 +41,17 @@ class _HomePageState extends State<HomePage> {
     });
     return cities;
   }
+  
+  Future<void> updateCityDataOrigin(dynamic provId) async {
+  setState(() {
+    isLoading = true;
+  });
+  cityDataOrigin = getCities(provId);
+  await cityDataOrigin;
+  setState(() {
+    isLoading = false;
+  });
+}
 
   @override
   void initState() {
@@ -51,6 +62,10 @@ class _HomePageState extends State<HomePage> {
     });
     getProvinces();
     cityDataOrigin = getCities(provinceIdOrigin);
+    // Future.delayed(Duration(seconds: 3), () {
+    //    getCities(provinceIdOrigin);
+    // });
+    
   }
 
   @override
@@ -167,13 +182,13 @@ class _HomePageState extends State<HomePage> {
                                           child: Text(value.province!),
                                         );
                                       }).toList(),
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          selectedProvinceOrigin = newValue;
-                                          provinceIdOrigin =
-                                              selectedProvinceOrigin.provinceId;
-                                        });
-                                      },
+                                      onChanged: (newValue) async {
+  setState(() {
+    selectedProvinceOrigin = newValue;
+    provinceIdOrigin = selectedProvinceOrigin.provinceId;
+  });
+  await updateCityDataOrigin(provinceIdOrigin);
+},
                                     ),
                             ),
                           ),
