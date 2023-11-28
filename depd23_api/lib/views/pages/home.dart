@@ -9,19 +9,27 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // dynamic provinceData;
-  List<Province> provinceData = [];
+  
   bool isLoading = false;
 
   List<String> shippingCompanies = ['jne', 'pos', 'tiki'];
   dynamic selectedShippingCompany;
   final ctrlNumber = TextEditingController();
 
+  List<Province> provinceData = [];
   dynamic provinceIdOrigin;
   dynamic selectedProvinceOrigin;
 
   dynamic cityDataOrigin;
   dynamic cityIdOrigin;
   dynamic selectedCityOrigin;
+
+  dynamic provinceIdTo;
+  dynamic selectedProvinceTo;
+
+  dynamic cityDataTo;
+  dynamic cityIdTo;
+  dynamic selectedCityTo;
 
   Future<dynamic> getProvinces() async {
     // dynamic prov;
@@ -34,8 +42,6 @@ class _HomePageState extends State<HomePage> {
     // return prov;
   }
 
-  
-
   Future<List<City>> getCities(dynamic provId) async {
     List<City> cities = [];
     await MasterDataService.getCity(provId).then((value) {
@@ -43,17 +49,16 @@ class _HomePageState extends State<HomePage> {
     });
     return cities;
   }
-  
+
   Future<void> updateCityDataOrigin(dynamic provId) async {
-  setState(() {
-    isLoading = true;
-  });
-  cityDataOrigin = getCities(provId);
-  await cityDataOrigin;
-  setState(() {
-    isLoading = false;
-  });
-}
+    cityDataOrigin = getCities(provId);
+    await cityDataOrigin;
+  }
+
+  Future<void> updateCityDataTo(dynamic provId) async {
+    cityDataTo = getCities(provId);
+    await cityDataTo;
+  }
 
   @override
   void initState() {
@@ -67,7 +72,6 @@ class _HomePageState extends State<HomePage> {
     // Future.delayed(Duration(seconds: 3), () {
     //    getCities(provinceIdOrigin);
     // });
-    
   }
 
   @override
@@ -185,13 +189,15 @@ class _HomePageState extends State<HomePage> {
                                         );
                                       }).toList(),
                                       onChanged: (newValue) async {
-  setState(() {
-    selectedProvinceOrigin = newValue;
-    provinceIdOrigin = selectedProvinceOrigin.provinceId;
-    selectedCityOrigin = null;
-  });
-  await updateCityDataOrigin(provinceIdOrigin);
-},
+                                        setState(() {
+                                          selectedProvinceOrigin = newValue;
+                                          provinceIdOrigin =
+                                              selectedProvinceOrigin.provinceId;
+                                          selectedCityOrigin = null;
+                                        });
+                                        await updateCityDataOrigin(
+                                            provinceIdOrigin);
+                                      },
                                     ),
                             ),
                           ),
@@ -200,7 +206,11 @@ class _HomePageState extends State<HomePage> {
                             child: FutureBuilder<List<City>>(
                                 future: cityDataOrigin,
                                 builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
+                                 var data = snapshot.connectionState;
+                                  if (data != ConnectionState.done){
+                                    return UiLoading.loadingSmall();
+                                  }else{
+                                    if (snapshot.hasData) {
                                     return DropdownButton(
                                         isExpanded: true,
                                         value: selectedCityOrigin,
@@ -229,7 +239,104 @@ class _HomePageState extends State<HomePage> {
                                   } else if (snapshot.hasError) {
                                     return Text("Tidak ada Data");
                                   }
-                                  return UiLoading.loadingSmall();
+                                  }
+                                  return Text('');
+                                }),
+                          ),
+                        ],
+                      )
+                    ]),
+                  )),
+                  Text("To"),
+              Flexible(
+                  flex: 1,
+                  child: Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Column(children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Flexible(
+                            child: Container(
+                              width: 100,
+                              child: provinceData.isEmpty
+                                  ? const Align(
+                                      alignment: Alignment.center,
+                                      child: Text("Data tidak ditemukan"),
+                                    )
+                                  : DropdownButton<Province>(
+                                      isExpanded: true,
+                                      value: selectedProvinceTo,
+                                      icon: Icon(Icons.arrow_drop_down),
+                                      iconSize: 30,
+                                      elevation: 4,
+                                      style: TextStyle(color: Colors.black),
+                                      hint: selectedProvinceTo == null
+                                          ? Text('Pilih Provinsi')
+                                          : Text(
+                                              selectedProvinceTo.province!),
+                                      items: provinceData
+                                          .map<DropdownMenuItem<Province>>(
+                                              (Province value) {
+                                        return DropdownMenuItem(
+                                          value: value,
+                                          child: Text(value.province!),
+                                        );
+                                      }).toList(),
+                                      onChanged: (newValue) async {
+                                        setState(() {
+                                          selectedProvinceTo = newValue;
+                                          provinceIdTo =
+                                              selectedProvinceTo.provinceId;
+                                          selectedCityTo = null;
+                                        });
+                                        await updateCityDataTo(
+                                            provinceIdTo);
+                                      },
+                                    ),
+                            ),
+                          ),
+                          Container(
+                            width: 100,
+                            child: FutureBuilder<List<City>>(
+                                future: cityDataTo,
+                                builder: (context, snapshot) {
+                                 var data = snapshot.connectionState;
+                                  if (data != ConnectionState.done){
+                                    return UiLoading.loadingSmall();
+                                  }else{
+                                    if (snapshot.hasData) {
+                                    return DropdownButton(
+                                        isExpanded: true,
+                                        value: selectedCityTo,
+                                        icon: Icon(Icons.arrow_drop_down),
+                                        iconSize: 30,
+                                        elevation: 4,
+                                        style: TextStyle(color: Colors.black),
+                                        hint: selectedCityTo == null
+                                            ? Text('Pilih Kota')
+                                            : Text(selectedCityTo.cityName),
+                                        items: snapshot.data!
+                                            .map<DropdownMenuItem<City>>(
+                                                (City value) {
+                                          return DropdownMenuItem(
+                                              value: value,
+                                              child: Text(
+                                                  value.cityName.toString()));
+                                        }).toList(),
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            selectedCityTo = newValue;
+                                            cityIdTo =
+                                                cityIdTo.cityId;
+                                          });
+                                        });
+                                  } else if (snapshot.hasError) {
+                                    return Text("Tidak ada Data");
+                                  }
+                                  }
+                                  return Text('');
                                 }),
                           ),
                         ],
@@ -246,31 +353,11 @@ class _HomePageState extends State<HomePage> {
                           alignment: Alignment.center,
                           child: Text("Data tidak ditemukan"),
                         )
-                      : DropdownButton<Province>(
-                          isExpanded: true,
-                          value: selectedProvinceOrigin,
-                          icon: Icon(Icons.arrow_drop_down),
-                          iconSize: 30,
-                          elevation: 4,
-                          style: TextStyle(color: Colors.black),
-                          hint: selectedProvinceOrigin == null
-                              ? Text('Pilih Provinsi')
-                              : Text(selectedProvinceOrigin.province!),
-                          items: provinceData.map<DropdownMenuItem<Province>>(
-                              (Province value) {
-                            return DropdownMenuItem(
-                              value: value,
-                              child: Text(value.province!),
-                            );
-                          }).toList(),
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedProvinceOrigin = newValue;
-                              provinceIdOrigin =
-                                  selectedProvinceOrigin!.provinceId;
-                            });
-                          },
-                        ),
+                      : ListView.builder(
+                        itemCount: provinceData.length,
+                        itemBuilder: (context, index){
+                          return CardProvince(provinceData[index]);
+                        })
                 ),
               ),
             ],
