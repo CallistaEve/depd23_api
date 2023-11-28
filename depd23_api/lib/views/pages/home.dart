@@ -19,6 +19,10 @@ class _HomePageState extends State<HomePage> {
   dynamic provinceIdOrigin;
   dynamic selectedProvinceOrigin;
 
+  dynamic cityDataOrigin;
+  dynamic cityIdOrigin;
+  dynamic selectedCityOrigin;
+
   Future<dynamic> getProvinces() async {
     // dynamic prov;
     await MasterDataService.getProvince().then((value) {
@@ -30,9 +34,7 @@ class _HomePageState extends State<HomePage> {
     // return prov;
   }
 
-  dynamic cityDataOrigin;
-  dynamic cityIdOrigin;
-  dynamic selectedCityOrigin;
+  
 
   Future<List<City>> getCities(dynamic provId) async {
     List<City> cities = [];
@@ -186,6 +188,7 @@ class _HomePageState extends State<HomePage> {
   setState(() {
     selectedProvinceOrigin = newValue;
     provinceIdOrigin = selectedProvinceOrigin.provinceId;
+    selectedCityOrigin = null;
   });
   await updateCityDataOrigin(provinceIdOrigin);
 },
