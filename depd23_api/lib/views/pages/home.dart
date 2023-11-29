@@ -70,20 +70,22 @@ class _HomePageState extends State<HomePage> {
     await cityDataTo;
   }
 
+  List<Costs> shippingCosts = [];
+
   Future<List<Costs>> getTCost(dynamic cityIdOrigin, dynamic cityIdTo,
-      dynamic controlNumber, dynamic selectedShippingCompany) async {
-      List<Costs> shippingCosts = [];
+      int controlNumber, dynamic selectedShippingCompany) async {
+    // Convert controlNumber to an integer
+    // int weight = int.parse(controlNumber);
 
-     await MasterDataService.getCost(
-        cityIdOrigin.toString(),
-        cityIdTo.toString(),
-        controlNumber,
-        selectedShippingCompany,
-      ).then((value) {
-        shippingCosts = value;
-      });
-      return shippingCosts;
-
+    await MasterDataService.getCost(
+      cityIdOrigin.toString(),
+      cityIdTo.toString(),
+      controlNumber,
+      selectedShippingCompany,
+    ).then((value) {
+      shippingCosts = value;
+    });
+    return shippingCosts;
   }
 
   @override
@@ -370,40 +372,47 @@ class _HomePageState extends State<HomePage> {
                   )),
               ElevatedButton(
                 onPressed: () async {
-                  // You may need to check if the required fields are not null before calling getTCost
                   if (selectedCityOrigin != null &&
                       selectedCityTo != null &&
                       ctrlNumber.text.isNotEmpty &&
                       selectedShippingCompany != null) {
-                    await getTCost(
-                      cityIdOrigin,
-                      cityIdTo,
-                      ctrlNumber,
-                      selectedShippingCompany,
+                    List<Costs> updatedShippingCosts = await getTCost(
+                      "501",
+                      "114",
+                      1700,
+                      "jne",
+                      // cityIdOrigin,
+                      // cityIdTo,
+                      // ctrlNumber.text,
+                      // selectedShippingCompany,
                     );
+
+                    setState(() {
+                      shippingCosts = updatedShippingCosts;
+                    });
                   } else {
-                    // Handle the case where not all required fields are filled
                     print('Please fill in all required fields');
                   }
                 },
                 child: Text('Calculate Shipping Cost'),
               ),
-              
               Flexible(
                 flex: 5,
                 child: Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: provinceOriginData.isEmpty
-                        ? const Align(
-                            alignment: Alignment.center,
-                            child: Text("Data tidak ditemukan"),
-                          )
-                        : ListView.builder(
-                            itemCount: provinceOriginData.length,
-                            itemBuilder: (context, index) {
-                              return CardProvince(provinceOriginData[index]);
-                            })),
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: shippingCosts.isEmpty
+                      ? const Align(
+                          alignment: Alignment.center,
+                          child: Text("Data tidak ditemukan"),
+                        )
+                      : ListView.builder(
+                          itemCount: shippingCosts.length,
+                          itemBuilder: (context, index) {
+                            return CardCost(shippingCosts[index]);
+                          },
+                        ),
+                ),
               ),
             ],
           ),

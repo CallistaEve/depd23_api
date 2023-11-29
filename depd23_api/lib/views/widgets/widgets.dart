@@ -5,3 +5,4 @@ import '../../models/models.dart';
 
 part 'uiloading.dart';
 part 'cardprovince.dart';
+part 'cardcost.dart';
