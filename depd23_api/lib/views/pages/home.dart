@@ -9,7 +9,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // dynamic provinceData;
-  
+
   bool isLoading = false;
 
   List<String> shippingCompanies = ['jne', 'pos', 'tiki'];
@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   dynamic cityIdOrigin;
   dynamic selectedCityOrigin;
 
-  List<Province> provinceToData =  [];
+  List<Province> provinceToData = [];
   dynamic provinceIdTo;
   dynamic selectedProvinceTo;
 
@@ -68,6 +68,22 @@ class _HomePageState extends State<HomePage> {
   Future<void> updateCityDataTo(dynamic provId) async {
     cityDataTo = getCitiesDestination(provId);
     await cityDataTo;
+  }
+
+  Future<List<Costs>> getTCost(dynamic cityIdOrigin, dynamic cityIdTo,
+      dynamic controlNumber, dynamic selectedShippingCompany) async {
+      List<Costs> shippingCosts = [];
+
+     await MasterDataService.getCost(
+        cityIdOrigin.toString(),
+        cityIdTo.toString(),
+        controlNumber,
+        selectedShippingCompany,
+      ).then((value) {
+        shippingCosts = value;
+      });
+      return shippingCosts;
+
   }
 
   @override
@@ -217,39 +233,40 @@ class _HomePageState extends State<HomePage> {
                             child: FutureBuilder<List<City>>(
                                 future: cityDataOrigin,
                                 builder: (context, snapshot) {
-                                 var data = snapshot.connectionState;
-                                  if (data != ConnectionState.done){
+                                  var data = snapshot.connectionState;
+                                  if (data != ConnectionState.done) {
                                     return UiLoading.loadingSmall();
-                                  }else{
+                                  } else {
                                     if (snapshot.hasData) {
-                                    return DropdownButton(
-                                        isExpanded: true,
-                                        value: selectedCityOrigin,
-                                        icon: Icon(Icons.arrow_drop_down),
-                                        iconSize: 30,
-                                        elevation: 4,
-                                        style: TextStyle(color: Colors.black),
-                                        hint: selectedCityOrigin == null
-                                            ? Text('Pilih Kota')
-                                            : Text(selectedCityOrigin.cityName),
-                                        items: snapshot.data!
-                                            .map<DropdownMenuItem<City>>(
-                                                (City value) {
-                                          return DropdownMenuItem(
-                                              value: value,
-                                              child: Text(
-                                                  value.cityName.toString()));
-                                        }).toList(),
-                                        onChanged: (newValue) {
-                                          setState(() {
-                                            selectedCityOrigin = newValue;
-                                            cityIdOrigin =
-                                                selectedCityOrigin.cityId;
+                                      return DropdownButton(
+                                          isExpanded: true,
+                                          value: selectedCityOrigin,
+                                          icon: Icon(Icons.arrow_drop_down),
+                                          iconSize: 30,
+                                          elevation: 4,
+                                          style: TextStyle(color: Colors.black),
+                                          hint: selectedCityOrigin == null
+                                              ? Text('Pilih Kota')
+                                              : Text(
+                                                  selectedCityOrigin.cityName),
+                                          items: snapshot.data!
+                                              .map<DropdownMenuItem<City>>(
+                                                  (City value) {
+                                            return DropdownMenuItem(
+                                                value: value,
+                                                child: Text(
+                                                    value.cityName.toString()));
+                                          }).toList(),
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              selectedCityOrigin = newValue;
+                                              cityIdOrigin =
+                                                  selectedCityOrigin.cityId;
+                                            });
                                           });
-                                        });
-                                  } else if (snapshot.hasError) {
-                                    return Text("Tidak ada Data");
-                                  }
+                                    } else if (snapshot.hasError) {
+                                      return Text("Tidak ada Data");
+                                    }
                                   }
                                   return Text('');
                                 }),
@@ -258,7 +275,7 @@ class _HomePageState extends State<HomePage> {
                       )
                     ]),
                   )),
-                  Text("To"),
+              Text("To"),
               Flexible(
                   flex: 1,
                   child: Container(
@@ -285,8 +302,7 @@ class _HomePageState extends State<HomePage> {
                                       style: TextStyle(color: Colors.black),
                                       hint: selectedProvinceTo == null
                                           ? Text('Pilih Provinsi')
-                                          : Text(
-                                              selectedProvinceTo.province!),
+                                          : Text(selectedProvinceTo.province!),
                                       items: provinceToData
                                           .map<DropdownMenuItem<Province>>(
                                               (Province value) {
@@ -302,8 +318,7 @@ class _HomePageState extends State<HomePage> {
                                               selectedProvinceTo.provinceId;
                                           selectedCityTo = null;
                                         });
-                                        await updateCityDataTo(
-                                            provinceIdTo);
+                                        await updateCityDataTo(provinceIdTo);
                                       },
                                     ),
                             ),
@@ -313,39 +328,38 @@ class _HomePageState extends State<HomePage> {
                             child: FutureBuilder<List<City>>(
                                 future: cityDataTo,
                                 builder: (context, snapshot) {
-                                 var data = snapshot.connectionState;
-                                  if (data != ConnectionState.done){
+                                  var data = snapshot.connectionState;
+                                  if (data != ConnectionState.done) {
                                     return UiLoading.loadingSmall();
-                                  }else{
+                                  } else {
                                     if (snapshot.hasData) {
-                                    return DropdownButton(
-                                        isExpanded: true,
-                                        value: selectedCityTo,
-                                        icon: Icon(Icons.arrow_drop_down),
-                                        iconSize: 30,
-                                        elevation: 4,
-                                        style: TextStyle(color: Colors.black),
-                                        hint: selectedCityTo == null
-                                            ? Text('Pilih Kota')
-                                            : Text(selectedCityTo.cityName),
-                                        items: snapshot.data!
-                                            .map<DropdownMenuItem<City>>(
-                                                (City value) {
-                                          return DropdownMenuItem(
-                                              value: value,
-                                              child: Text(
-                                                  value.cityName.toString()));
-                                        }).toList(),
-                                        onChanged: (newValue) {
-                                          setState(() {
-                                            selectedCityTo = newValue;
-                                            cityIdTo =
-                                                selectedCityTo.cityId;
+                                      return DropdownButton(
+                                          isExpanded: true,
+                                          value: selectedCityTo,
+                                          icon: Icon(Icons.arrow_drop_down),
+                                          iconSize: 30,
+                                          elevation: 4,
+                                          style: TextStyle(color: Colors.black),
+                                          hint: selectedCityTo == null
+                                              ? Text('Pilih Kota')
+                                              : Text(selectedCityTo.cityName),
+                                          items: snapshot.data!
+                                              .map<DropdownMenuItem<City>>(
+                                                  (City value) {
+                                            return DropdownMenuItem(
+                                                value: value,
+                                                child: Text(
+                                                    value.cityName.toString()));
+                                          }).toList(),
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              selectedCityTo = newValue;
+                                              cityIdTo = selectedCityTo.cityId;
+                                            });
                                           });
-                                        });
-                                  } else if (snapshot.hasError) {
-                                    return Text("Tidak ada Data");
-                                  }
+                                    } else if (snapshot.hasError) {
+                                      return Text("Tidak ada Data");
+                                    }
                                   }
                                   return Text('');
                                 }),
@@ -354,22 +368,42 @@ class _HomePageState extends State<HomePage> {
                       )
                     ]),
                   )),
+              ElevatedButton(
+                onPressed: () async {
+                  // You may need to check if the required fields are not null before calling getTCost
+                  if (selectedCityOrigin != null &&
+                      selectedCityTo != null &&
+                      ctrlNumber.text.isNotEmpty &&
+                      selectedShippingCompany != null) {
+                    await getTCost(
+                      cityIdOrigin,
+                      cityIdTo,
+                      ctrlNumber,
+                      selectedShippingCompany,
+                    );
+                  } else {
+                    // Handle the case where not all required fields are filled
+                    print('Please fill in all required fields');
+                  }
+                },
+                child: Text('Calculate Shipping Cost'),
+              ),
+              
               Flexible(
                 flex: 5,
                 child: Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: provinceOriginData.isEmpty
-                      ? const Align(
-                          alignment: Alignment.center,
-                          child: Text("Data tidak ditemukan"),
-                        )
-                      : ListView.builder(
-                        itemCount: provinceOriginData.length,
-                        itemBuilder: (context, index){
-                          return CardProvince(provinceOriginData[index]);
-                        })
-                ),
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: provinceOriginData.isEmpty
+                        ? const Align(
+                            alignment: Alignment.center,
+                            child: Text("Data tidak ditemukan"),
+                          )
+                        : ListView.builder(
+                            itemCount: provinceOriginData.length,
+                            itemBuilder: (context, index) {
+                              return CardProvince(provinceOriginData[index]);
+                            })),
               ),
             ],
           ),
