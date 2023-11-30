@@ -36,43 +36,40 @@ class MasterDataService {
     }
 
     List<City> selectedCities = [];
-    for(var c in result){
-      if(c.provinceId == provId){
+    for (var c in result) {
+      if (c.provinceId == provId) {
         selectedCities.add(c);
       }
     }
 
     return selectedCities;
-    
   }
 
-  static Future<List<Costs>> getCost(String origin, String destination, int weight, String courier) async {
-  var response = await http.post(
-    Uri.https(Const.baseUrl, "/starter/cost"),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-      'key': Const.apiKey,
-    },
-    body: json.encode({
-      'origin': origin.toString(),
-      'destination': destination.toString(),
-      'weight': weight.toInt(),
-      'courier': courier.toString(),
-    }),
-  );
+  static Future<List<Costs>> getCost(
+      String origin, String destination, String weight, String courier) async {
+    var response = await http.post(
+      Uri.https(Const.baseUrl, "/starter/cost"),
+      headers: <String, String>{
+        'key': Const.apiKey,
+      },
+      body: <String, String>{
+        'origin': origin,
+        'destination': destination,
+        'weight': weight,
+        'courier': courier,
+      },
+    );
 
-  var job = json.decode(response.body);
-  List<Costs> result = [];
+    var job = json.decode(response.body);
+    List<Costs> result = [];
 
-  if (response.statusCode == 200) {
-    if (job['rajaongkir']['status']['code'] == 200) {
-      List<dynamic> results = job['rajaongkir']['results'];
-      result = results.map((e) => Costs.fromJson(e)).toList();
+    if (response.statusCode == 200) {
+      if (job['rajaongkir']['status']['code'] == 200) {
+        List<dynamic> results = job['rajaongkir']['results'][0]['costs'];
+        result = results.map((e) => Costs.fromJson(e)).toList();
+        print(result);
+      }
     }
+    return result;
   }
-  return result;
 }
-
-  
-}
-

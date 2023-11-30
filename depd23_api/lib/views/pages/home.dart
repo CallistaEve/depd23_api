@@ -15,6 +15,7 @@ class _HomePageState extends State<HomePage> {
   List<String> shippingCompanies = ['jne', 'pos', 'tiki'];
   dynamic selectedShippingCompany;
   final ctrlNumber = TextEditingController();
+  dynamic weight;
 
   List<Province> provinceOriginData = [];
   dynamic provinceIdOrigin;
@@ -73,14 +74,11 @@ class _HomePageState extends State<HomePage> {
   List<Costs> shippingCosts = [];
 
   Future<List<Costs>> getTCost(dynamic cityIdOrigin, dynamic cityIdTo,
-      int controlNumber, dynamic selectedShippingCompany) async {
-    // Convert controlNumber to an integer
-    // int weight = int.parse(controlNumber);
-
+      String weight, dynamic selectedShippingCompany) async {
     await MasterDataService.getCost(
       cityIdOrigin.toString(),
       cityIdTo.toString(),
-      controlNumber,
+      weight,
       selectedShippingCompany,
     ).then((value) {
       shippingCosts = value;
@@ -108,9 +106,13 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('HomePage'),
+        title: Text(
+          'Hitung Ongkir',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
       ),
       body: Stack(
         children: [
@@ -161,26 +163,27 @@ class _HomePageState extends State<HomePage> {
                             // border: OutlineInputBorder(),
                             // prefixIcon: Icon(Icons.phone),
                           ),
-                          // autovalidateMode: AutovalidateMode.onUserInteraction,
-                          // validator: (value) {
-                          // if (value!.isEmpty) {
-                          //   return 'Nomor telepon harus diisi';
-                          // }
-                          // if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
-                          //   return 'Nomor telepon hanya boleh mengandung angka';
-                          // }
-                          // if (value.length < 8 || value.length > 13) {
-                          //   return 'Nomor telepon harus terdiri dari 8 hingga 13 angka';
-                          // }
-                          //   return null;
-                          // },
+                          onChanged: (newValue) async {
+                            setState(() {
+                              weight = newValue;
+                            });
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              Text("Origin"),
+              Container(
+                width: double.infinity,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 45.0), // Add left padding
+                  child: Text(
+                    "Origin",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                ),
+              ),
               Flexible(
                   flex: 1,
                   child: Container(
@@ -188,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                     height: double.infinity,
                     child: Column(children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Flexible(
                             child: Container(
@@ -277,7 +280,16 @@ class _HomePageState extends State<HomePage> {
                       )
                     ]),
                   )),
-              Text("To"),
+              Container(
+                width: double.infinity,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 45.0), // Add left padding
+                  child: Text(
+                    "Destination",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                ),
+              ),
               Flexible(
                   flex: 1,
                   child: Container(
@@ -285,7 +297,7 @@ class _HomePageState extends State<HomePage> {
                     height: double.infinity,
                     child: Column(children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Flexible(
                             child: Container(
@@ -370,31 +382,44 @@ class _HomePageState extends State<HomePage> {
                       )
                     ]),
                   )),
-              ElevatedButton(
-                onPressed: () async {
-                  if (selectedCityOrigin != null &&
-                      selectedCityTo != null &&
-                      ctrlNumber.text.isNotEmpty &&
-                      selectedShippingCompany != null) {
-                    List<Costs> updatedShippingCosts = await getTCost(
-                      "501",
-                      "114",
-                      1700,
-                      "jne",
-                      // cityIdOrigin,
-                      // cityIdTo,
-                      // ctrlNumber.text,
-                      // selectedShippingCompany,
-                    );
+              Container(
+                margin: EdgeInsets.only(bottom: 16.0),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (selectedCityOrigin != null &&
+                        selectedCityTo != null &&
+                        ctrlNumber.text.isNotEmpty &&
+                        selectedShippingCompany != null) {
+                      setState(() {
+                        isLoading = true;
+                      });
 
-                    setState(() {
-                      shippingCosts = updatedShippingCosts;
-                    });
-                  } else {
-                    print('Please fill in all required fields');
-                  }
-                },
-                child: Text('Calculate Shipping Cost'),
+                      List<Costs> updatedShippingCosts = await getTCost(
+                        cityIdOrigin,
+                        cityIdTo,
+                        weight,
+                        selectedShippingCompany,
+                      );
+
+                      setState(() {
+                        shippingCosts = updatedShippingCosts;
+                        isLoading = false;
+                      });
+                    } else {
+                      print('Please fill in all required fields');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    primary: Colors.blue,
+                  ),
+                  child: Text(
+                    'Hitung Estimasi Harga',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
               Flexible(
                 flex: 5,
